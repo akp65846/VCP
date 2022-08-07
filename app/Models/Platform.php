@@ -10,9 +10,8 @@ class Platform extends Model
     use HasFactory;
 
     protected $table = 'platform';
-    public $timestamps = false;
 
-    protected $fillable = ['url', 'description', 'status'];
+    protected $fillable = ['name', 'url', 'description', 'status'];
     protected $guarded = ['status'];
 
     const CREATED_AT = 'created_time';

@@ -33,6 +33,7 @@ class PlatformController extends ApiController
     public function store(Request $request)
     {
         $platform = new Platform($request->all());
+        $platform->save();
         return $this->successResponse($platform);
     }
 
