@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\api;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class AuthController extends Controller
+class AuthController extends ApiController
 {
     /**
      * @param Request $request
@@ -39,7 +39,8 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken($postData['device_name'])->plainTextToken;
-        return response()->json(["status" => 1, "access_token" => $token]);
+
+        return $this->successResponse(["access_token" => $token]);
     }
 
     /**
@@ -61,6 +62,6 @@ class AuthController extends Controller
             'password' => Hash::make($postData['password'])
         ]);
 
-        return response()->json(["status" => 1, "message" => "Success"], 201);
+        return $this->successResponse(null);
     }
 }

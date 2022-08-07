@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 //Route::get('user', PlatformController::class);
 
-Route::get('platform', [PlatformController::class, 'index']);
+
+Route::middleware('auth:sanctum')->get('platform', [PlatformController::class, 'index']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);

@@ -2,11 +2,19 @@
 
 namespace App\Exceptions;
 
+use App\Enum\StatusCode;
+use App\Traits\ApiResponser;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
+    use ApiResponser;
+
     /**
      * A list of exception types with their corresponding custom log levels.
      *
@@ -46,5 +54,30 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $e)
+    {
+        if ($e instanceof MethodNotAllowedHttpException) {
+            return $this->errorResponse('The specific method for the request is invalid', StatusCode::HTTP_METHOD_NOT_ALLOWED);
+        }
+
+        if ($e instanceof NotFoundHttpException) {
+            return $this->errorResponse('The specific URL cannot be found', StatusCode::HTTP_NOT_FOUND);
+        }
+
+        if ($e instanceof HttpException) {
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
+        }
+
+        if ($e instanceof ValidationException) {
+            return $this->errorResponse($e->getMessage(), StatusCode::HTTP_UNPROCESSABLE_CONTENT);
+        }
+
+        if (config('app.debug')) {
+            return parent::render($request, $e);
+        }
+
+        return $this->errorResponse('Unexpected Exception. Try later', StatusCode::HTTP_INTERNAL_SERVER_ERROR);
     }
 }
