@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\api;
 
+use App\Enum\PlatformConstant;
 use App\Enum\StatusCode;
 use App\Http\Controllers\ApiController;
 use App\Models\Platform;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class PlatformController extends ApiController
 {
@@ -32,7 +34,27 @@ class PlatformController extends ApiController
      */
     public function store(Request $request)
     {
-        $platform = new Platform($request->all());
+
+        $rules = [
+            'name' => 'required',
+        ];
+
+        $postData = Validator::make($request->post(), $rules)->validate();
+
+        if (!in_array($postData['name'], PlatformConstant::allName())) {
+            return $this->errorResponse('Invalid platform name');
+        }
+
+        if (!isset($postData['status'])) {
+            $postData['status'] = PlatformConstant::STATUS_ACTIVE;
+        } else {
+            if (!in_array($postData['status'], PlatformConstant::allStatus())) {
+                return $this->errorResponse('Invalid platform status');
+            }
+        }
+
+        $platform = new Platform($postData);
+
         $platform->save();
         return $this->successResponse($platform);
     }
