@@ -10,11 +10,11 @@ class ContentCreatorConstant
     /**
      * @return string[]
      */
-    public function allStatus(): array
+    public static function allStatus(): array
     {
         return [
-            self::STATUS_ACTIVE => 'Active',
-            self::STATUS_INACTIVE => 'Inactive'
+            self::STATUS_ACTIVE,
+            self::STATUS_INACTIVE
         ];
     }
 }
