@@ -85,7 +85,7 @@ class PlatformController extends ApiController
      */
     public function update(Request $request, $id)
     {
-        $platform = Platform::query()->where('id', $id)->first();
+        $platform = Platform::query()->find($id);
 
         if (empty($platform)) {
             return $this->errorResponse('Platform not found');
