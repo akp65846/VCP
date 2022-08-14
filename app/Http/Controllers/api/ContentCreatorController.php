@@ -2,16 +2,25 @@
 
 namespace App\Http\Controllers\api;
 
+use App\Enum\ContentCreatorConstant;
+use App\Enum\StatusCode;
 use App\Http\Controllers\ApiController;
 use App\Models\ContentCreator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class ContentCreatorController extends ApiController
 {
+    public function __construct() {
+        $this->middleware('auth:sanctum');
+    }
+
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function index()
     {
@@ -21,19 +30,37 @@ class ContentCreatorController extends ApiController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ValidationException
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
+        $rules = [
+            'platform_id' => 'required|exists:platform,id',
+            'status' => 'required',
+        ];
+
+        $postData = $request->post();
+        Validator::make($postData, $rules)->validate();
+
+        if (!in_array($postData['status'], ContentCreatorConstant::allStatus())) {
+            return $this->errorResponse('Invalid status');
+        }
+
+        $contentCreator = new ContentCreator($request->post());
+        $contentCreator->save();
+
+        $contentCreator = $contentCreator->refresh();
+
+        return $this->successResponse($contentCreator, StatusCode::HTTP_CREATED);
     }
 
     /**
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function show($id)
     {
@@ -43,7 +70,7 @@ class ContentCreatorController extends ApiController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
