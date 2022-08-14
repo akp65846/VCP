@@ -18,6 +18,7 @@ class Video extends Model
         'media_id',
         'status',
         'approval_status',
+        'approval_time',
         'publishment_id',
         'cover_image_url',
         'title',
