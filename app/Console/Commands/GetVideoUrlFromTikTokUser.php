@@ -26,13 +26,7 @@ class GetVideoUrlFromTikTokUser extends Command
      *
      * @var string
      */
-    protected $description = 'Get all video url from  a tiktok content creator';
-
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
+    protected $description = 'Get all video url from a tiktok content creator';
 
     const API_BASE_URL = 'https://www.douyin.com/aweme/v1/web/aweme/post/';
 

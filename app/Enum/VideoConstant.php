@@ -6,6 +6,7 @@ class VideoConstant
 {
     const STATUS_ACTIVE = 1;
     const STATUS_INACTIVE = 2;
+    const STATUS_INVALID = 3;
 
     const APPROVAL_STATUS_PENDING = 1;
     const APPROVAL_STATUS_APPROVED = 2;
@@ -18,7 +19,8 @@ class VideoConstant
     {
         return [
             self::STATUS_ACTIVE,
-            self::STATUS_INACTIVE
+            self::STATUS_INACTIVE,
+            self::STATUS_INVALID
         ];
     }
 }
