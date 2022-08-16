@@ -2,10 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Enum\MediaConstant;
 use App\Enum\StatusCode;
 use App\Enum\VideoConstant;
+use App\Models\Media;
 use App\Models\Video;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
@@ -28,7 +31,6 @@ class ProcessApprovedVideo extends Command {
 
     public function handle()
     {
-        // check video url status code is ok
         $video = Video::query()->find($this->argument('videoID'));
         if (!$video instanceof Video) {
             $this->error("Video not found");
@@ -65,11 +67,21 @@ class ProcessApprovedVideo extends Command {
                 $this->error("Video url response code is {$code}");
                 return FALSE;
             }
-        } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+        } catch (GuzzleException $e) {
             $this->markAsInvalid();
             $this->error($e->getMessage());
             return FALSE;
         }
+
+        $mediaPath = 'video' . '/' . date('Y') . '/' . date('m') . '/' .  date('d');
+        $mediaFileName = $this->video['id'] . '_' . $this->video['content_creator_id'];
+        $publicPath = 'public' . '/' . $mediaPath;
+        $publicPathWithFile = $publicPath . '/' . $mediaFileName . '.' . $extension;
+
+        if (!Storage::path('public' . '/' . $mediaPath)) {
+            Storage::makeDirectory('public' . '/' . $mediaPath);
+        }
+        Storage::makeDirectory($mediaPath);
 
         //TODO:: install ssl to server and set php.ini
         $stream_opts = [
@@ -79,7 +91,6 @@ class ProcessApprovedVideo extends Command {
             ]
         ];
 
-//        $videoContent = file_get_contents($this->video['source_url']);
         $videoContent = file_get_contents($this->video['source_url'], false, stream_context_create($stream_opts));
 
         if (empty($videoContent)) {
@@ -88,8 +99,22 @@ class ProcessApprovedVideo extends Command {
             return FALSE;
         }
 
-        Storage::disk('local')->put('test_video' . '.' . $extension, $videoContent);
+        Storage::put($publicPathWithFile, $videoContent, 'public');
 
+        $media = new Media();
+        $media['status'] = MediaConstant::STATUS_ACTIVE;
+        $media['path'] = $publicPathWithFile;
+        $media['file_name'] = $mediaFileName . '.' . $extension;
+        $media['file_size'] = Storage::size($publicPathWithFile);
+        $media['file_format'] = $extension;
+        $media->save();
+
+        $this->video->update([
+            'media_id' => $media['id']
+        ]);
+
+        $this->info("Upload Success");
+        return TRUE;
     }
 
     protected function markAsInvalid() {
