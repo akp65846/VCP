@@ -3,6 +3,7 @@
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\api\ContentCreatorController;
 use App\Http\Controllers\api\PlatformController;
+use App\Http\Controllers\api\PublishmentController;
 use App\Http\Controllers\api\VideoController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,7 +26,7 @@ use Illuminate\Support\Facades\Route;
 
 
 //Auth
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/login', [AuthController::class, 'login'])->name('login');
 Route::post('/auth/register', [AuthController::class, 'register']);
 
 //Platform
@@ -40,3 +41,6 @@ Route::post('content-creator', [ContentCreatorController::class, 'store']);
 Route::get('video', [VideoController::class, 'index']);
 Route::post('/video/approve', [VideoController::class, 'approveVideo']);
 Route::post('/video/reject', [VideoController::class, 'rejectVideo']);
+
+//Publishment
+Route::post('publishment', [PublishmentController::class, 'publish']);

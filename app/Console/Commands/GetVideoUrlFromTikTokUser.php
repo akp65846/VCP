@@ -110,6 +110,7 @@ class GetVideoUrlFromTikTokUser extends Command
 
             $fields = [
                 'key' => $item['video']['play_addr']['uri'],
+                'platform_id' => $contentCreator->platform_id,
                 'content_creator_id' => $contentCreator->id,
                 'source_url' => $videoUrl,
                 'status' => VideoConstant::STATUS_ACTIVE,

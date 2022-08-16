@@ -12,6 +12,7 @@ class Video extends Model
     protected $table = 'video';
 
     protected $fillable = [
+        'platform_id',
         'content_creator_id',
         'key',
         'source_url',
