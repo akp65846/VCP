@@ -117,6 +117,12 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+
+        'tasklog' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/task.log'),
+            'bubble' => false
+        ]
     ],
 
 ];

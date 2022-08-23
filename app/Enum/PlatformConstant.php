@@ -10,6 +10,9 @@ class PlatformConstant
     const NAME_YOUTUBE = 'youtube';
     const NAME_TIKTOK = 'tiktok';
 
+    const GROUP_YOUTUBE = 'youtube';
+    const GROUP_TIKTOK = 'tiktok';
+
 
     /**
      * @return int[]
@@ -30,6 +33,17 @@ class PlatformConstant
         return [
           self::NAME_YOUTUBE,
           self::NAME_TIKTOK
+        ];
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function allGroup(): array
+    {
+        return [
+            self::GROUP_TIKTOK,
+            self::GROUP_YOUTUBE,
         ];
     }
 }

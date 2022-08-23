@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Retrieve;
 
 use App\Enum\ContentCreatorConstant;
 use App\Enum\PlatformConstant;
@@ -8,9 +8,11 @@ use App\Enum\VideoConstant;
 use App\Models\ContentCreator;
 use App\Models\Platform;
 use App\Models\Video;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Http;
+use function str_contains;
 
 class GetVideoUrlFromTikTokUser extends Command
 {
@@ -19,7 +21,7 @@ class GetVideoUrlFromTikTokUser extends Command
      *
      * @var string
      */
-    protected $signature = 'video:load-tiktok {creatorID}';
+    protected $signature = 'retrieve:load-tiktok {creatorID}';
 
     /**
      * The console command description.
@@ -30,6 +32,9 @@ class GetVideoUrlFromTikTokUser extends Command
 
     const API_BASE_URL = 'https://www.douyin.com/aweme/v1/web/aweme/post/';
 
+    /**
+     * @throws Exception
+     */
     public function handle()
     {
 
@@ -37,34 +42,26 @@ class GetVideoUrlFromTikTokUser extends Command
         $skippedCount = 0;
         $exceedLengthCount = 0;
 
-        $progressBar = $this->output->createProgressBar(100);
-
-        $contentCreator = ContentCreator::query()->where('id', $this->argument('creatorID'))->where('status', ContentCreatorConstant::STATUS_ACTIVE)->first();
+        $creatorID = $this->argument('creatorID');
+        $contentCreator = ContentCreator::query()->where('id', $creatorID)->where('status', ContentCreatorConstant::STATUS_ACTIVE)->first();
 
         if (empty($contentCreator)) {
-            $this->error("Content creator not found");
-            exit();
+            throw new Exception("Content creator not found for creator id {$creatorID}");
         }
-
-        $progressBar->advance(10);
 
         $platform = Platform::query()->where('id', $contentCreator->platform_id)->where('status', ContentCreatorConstant::STATUS_ACTIVE)->first();
 
         if (empty($platform)) {
-            $this->error("Platform not found");
-            exit();
+            throw new Exception("Platform not found for creator id {$creatorID}");
         }
 
-        if ($platform->name != PlatformConstant::NAME_TIKTOK) {
-            $this->error("Platform is not TikTok");
-            exit();
+        if ($platform->group != PlatformConstant::GROUP_TIKTOK) {
+            throw new Exception("Platform group is not TikTok creator id {$creatorID}");
         }
 
         if (empty($contentCreator->platform_unique_uid)) {
-            $this->error("Platform unique user id not found");
+            throw new Exception("Platform unique user id not found for creator id {$creatorID}");
         }
-
-        $progressBar->advance(10);
 
         $referer = 'https://www.douyin.com/user/' . $contentCreator->platform_unique_uid;
 
@@ -77,15 +74,11 @@ class GetVideoUrlFromTikTokUser extends Command
             'count' => 50
         ]);
 
-        $progressBar->advance(30);
-
         $isSuccess = $response->successful();
 
         if (!$isSuccess) {
-            $this->error($response);
-            exit();
+            throw new Exception("response error for creator id {$creatorID}- " . $response);
         }
-//        Storage::disk('local')->put('sample_tiktok_response.json', $response);
         $data = $response->json();
 
         $list = empty($data['aweme_list']) || !is_array($data['aweme_list']) ? [] : $data['aweme_list'];
@@ -137,9 +130,7 @@ class GetVideoUrlFromTikTokUser extends Command
                 $skippedCount++;
             }
         }
-
-        $progressBar->advance(50);
-
         $this->info("Success, loaded: " . sizeof($list) . ", created: " . $savedCount . ", skipped: " . $skippedCount . ", exceed length: " . $exceedLengthCount);
+        return $savedCount;
     }
 }

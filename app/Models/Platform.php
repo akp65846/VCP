@@ -11,7 +11,7 @@ class Platform extends Model
 
     protected $table = 'platform';
 
-    protected $fillable = ['name', 'url', 'description', 'status'];
+    protected $fillable = ['name', 'group', 'url', 'description', 'status'];
     protected $guarded = ['status'];
 
     const CREATED_AT = 'created_time';
