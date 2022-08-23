@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('task:load-video-url')->daily();
+        $schedule->command('task:process-approved-video')->everyFifteenMinutes();
     }
 
     /**
