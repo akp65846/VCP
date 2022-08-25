@@ -44,6 +44,7 @@ Route::patch('/content-creator/{id}', [ContentCreatorController::class, 'update'
 
 //Video
 Route::get('video', [VideoController::class, 'index']);
+Route::get('/video/{id}', [VideoController::class, 'show']);
 Route::patch('/video/{id}', [VideoController::class, 'update']);
 Route::post('/video/approve', [VideoController::class, 'approveVideo']);
 Route::post('/video/reject', [VideoController::class, 'rejectVideo']);

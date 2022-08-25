@@ -13,7 +13,7 @@ class VideoConstant
     const APPROVAL_STATUS_REJECTED = 3;
 
     /**
-     * @return string[]
+     * @return int []
      */
     public function allStatus(): array
     {

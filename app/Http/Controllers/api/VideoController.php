@@ -27,6 +27,23 @@ class VideoController extends ApiController
     }
 
     /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return JsonResponse
+     */
+    public function show($id): JsonResponse
+    {
+        $video = Video::query()->find($id);
+
+        if (empty($video)) {
+            return $this->errorResponse("Video not found");
+        }
+
+        return $this->successResponse($video);
+    }
+
+    /**
      * @param Request $request
      * @return JsonResponse
      */
@@ -73,6 +90,22 @@ class VideoController extends ApiController
         } else {
             return $this->errorResponse('Cannot process request', StatusCode::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public function update(Request $request, $id): JsonResponse
+    {
+        $video = Video::query()->find($id);
+
+        $patchData = $request->all();
+
+        unset($patchData['approval_status'], $patchData['approval_time']);
+
+        if (!$video instanceof Video) {
+            return $this->errorResponse('Video not found');
+        }
+
+        $video->update($patchData);
+        return $this->successResponse($video);
     }
 
 
