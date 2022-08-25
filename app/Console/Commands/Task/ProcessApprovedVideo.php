@@ -46,7 +46,7 @@ class ProcessApprovedVideo extends Command
                 $videoID = $approvedVideo['id'];
 
                 try {
-                    $this->call('video:process-approved-video', [
+                    $this->call('video:download-video', [
                         'videoID' => $videoID
                     ]);
 

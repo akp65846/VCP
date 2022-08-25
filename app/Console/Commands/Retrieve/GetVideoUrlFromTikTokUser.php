@@ -100,6 +100,10 @@ class GetVideoUrlFromTikTokUser extends Command
                 }
             }
 
+            if ($videoUrl === "") {
+                $videoUrl = current($videoLinks);
+            }
+
 
             $fields = [
                 'key' => $item['video']['play_addr']['uri'],
@@ -126,10 +130,14 @@ class GetVideoUrlFromTikTokUser extends Command
                     $skippedCount++;
                 }
             }catch (QueryException $e) {
-                $this->warn($e->getMessage());
                 $skippedCount++;
             }
         }
+
+        $contentCreator->update([
+           'last_processed_time' => now()
+        ]);
+
         $this->info("Success, loaded: " . sizeof($list) . ", created: " . $savedCount . ", skipped: " . $skippedCount . ", exceed length: " . $exceedLengthCount);
         return $savedCount;
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Video;
 
 use App\Enum\MediaConstant;
 use App\Enum\StatusCode;
@@ -12,13 +12,13 @@ use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
-class ProcessApprovedVideo extends Command {
+class DownloadVideo extends Command {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'video:process-approved-video {videoID}';
+    protected $signature = 'video:download-video {videoID}';
 
     /**
      * The console command description.
