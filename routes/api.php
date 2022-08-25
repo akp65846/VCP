@@ -32,6 +32,8 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 //Platform
 Route::post('platform', [PlatformController::class, 'store']);
 Route::get('platform', [PlatformController::class, 'index']);
+Route::get('/platform/{id}', [PlatformController::class, 'show']);
+Route::patch('/platform/{id}', [PlatformController::class, 'update']);
 
 //ContentCreator
 Route::get('content-creator', [ContentCreatorController::class, 'index']);
@@ -39,6 +41,7 @@ Route::post('content-creator', [ContentCreatorController::class, 'store']);
 
 //Video
 Route::get('video', [VideoController::class, 'index']);
+Route::patch('/video/{id}', [VideoController::class, 'update']);
 Route::post('/video/approve', [VideoController::class, 'approveVideo']);
 Route::post('/video/reject', [VideoController::class, 'rejectVideo']);
 

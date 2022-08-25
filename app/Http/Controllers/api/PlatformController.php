@@ -6,8 +6,10 @@ use App\Enum\PlatformConstant;
 use App\Enum\StatusCode;
 use App\Http\Controllers\ApiController;
 use App\Models\Platform;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class PlatformController extends ApiController
 {
@@ -19,7 +21,7 @@ class PlatformController extends ApiController
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function index()
     {
@@ -29,20 +31,28 @@ class PlatformController extends ApiController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ValidationException
      */
     public function store(Request $request)
     {
+        $postData = $request->post();
 
         $rules = [
             'name' => 'required',
+            'group' => 'required',
+            'type' => 'required'
         ];
 
-        $postData = Validator::make($request->post(), $rules)->validate();
+        Validator::make($postData, $rules)->validate();
 
-        if (!in_array($postData['name'], PlatformConstant::allName())) {
-            return $this->errorResponse('Invalid platform name');
+        if (!in_array($postData['group'], PlatformConstant::allGroup())) {
+            return $this->errorResponse('Invalid platform group');
+        }
+
+        if (!in_array($postData['type'], PlatformConstant::allType())) {
+            return $this->errorResponse('Invalid platform type');
         }
 
         if (!isset($postData['status'])) {
@@ -63,11 +73,11 @@ class PlatformController extends ApiController
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function show($id)
+    public function show($id): JsonResponse
     {
-        $platform = Platform::query()->where('id', $id)->first();
+        $platform = Platform::query()->find($id);
 
         if (!empty($platform)) {
             return $this->successResponse($platform);
@@ -79,12 +89,15 @@ class PlatformController extends ApiController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): JsonResponse
     {
+
+        $patchData = $request->post();
+
         $platform = Platform::query()->find($id);
 
         if (empty($platform)) {
@@ -99,7 +112,7 @@ class PlatformController extends ApiController
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {

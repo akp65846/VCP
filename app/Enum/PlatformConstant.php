@@ -7,12 +7,11 @@ class PlatformConstant
     const STATUS_ACTIVE = 1;
     const STATUS_INACTIVE = 2;
 
-    const NAME_YOUTUBE = 'youtube';
-    const NAME_TIKTOK = 'tiktok';
-
     const GROUP_YOUTUBE = 'youtube';
     const GROUP_TIKTOK = 'tiktok';
 
+    const TYPE_SOURCE = 1;
+    const TYPE_TARGET = 2;
 
     /**
      * @return int[]
@@ -24,18 +23,6 @@ class PlatformConstant
         ];
     }
 
-
-    /**
-     * @return string[]
-     */
-    public static function allName(): array
-    {
-        return [
-          self::NAME_YOUTUBE,
-          self::NAME_TIKTOK
-        ];
-    }
-
     /**
      * @return string[]
      */
@@ -44,6 +31,17 @@ class PlatformConstant
         return [
             self::GROUP_TIKTOK,
             self::GROUP_YOUTUBE,
+        ];
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function allType(): array
+    {
+        return [
+            self::TYPE_SOURCE,
+            self::TYPE_TARGET
         ];
     }
 }
