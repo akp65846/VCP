@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\api\ContentCreatorController;
+use App\Http\Controllers\api\MediaController;
 use App\Http\Controllers\api\PlatformController;
 use App\Http\Controllers\api\PublishmentController;
 use App\Http\Controllers\api\VideoController;
@@ -46,6 +47,11 @@ Route::get('video', [VideoController::class, 'index']);
 Route::patch('/video/{id}', [VideoController::class, 'update']);
 Route::post('/video/approve', [VideoController::class, 'approveVideo']);
 Route::post('/video/reject', [VideoController::class, 'rejectVideo']);
+
+//Media
+Route::get('media', [MediaController::class, 'index']);
+Route::get('/media/{id}', [MediaController::class, 'show']);
+Route::patch('/media/{id}', [MediaController::class, 'update']);
 
 //Publishment
 Route::post('publishment', [PublishmentController::class, 'publish']);
