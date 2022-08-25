@@ -22,7 +22,7 @@ class ContentCreatorController extends ApiController
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
         return $this->successResponse(ContentCreator::all());
     }
@@ -62,9 +62,15 @@ class ContentCreatorController extends ApiController
      * @param  int  $id
      * @return JsonResponse
      */
-    public function show($id)
+    public function show($id): JsonResponse
     {
-        //
+        $contentCreator = ContentCreator::query()->find($id);
+
+        if (empty($contentCreator)) {
+            return $this->errorResponse("Content creator not found");
+        }
+
+        return $this->successResponse($contentCreator);
     }
 
     /**
@@ -72,10 +78,19 @@ class ContentCreatorController extends ApiController
      *
      * @param Request $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function update(Request $request, $id)
     {
-        //
+        $patchData = $request->post();
+
+        $contentCreator = ContentCreator::query()->find($id);
+
+        if (empty($contentCreator)) {
+            return $this->errorResponse("Content creator not found");
+        }
+
+        $contentCreator->update($patchData);
+        return $this->successResponse($contentCreator);
     }
 }

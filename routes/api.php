@@ -38,6 +38,8 @@ Route::patch('/platform/{id}', [PlatformController::class, 'update']);
 //ContentCreator
 Route::get('content-creator', [ContentCreatorController::class, 'index']);
 Route::post('content-creator', [ContentCreatorController::class, 'store']);
+Route::get('/content-creator/{id}', [ContentCreatorController::class, 'show']);
+Route::patch('/content-creator/{id}', [ContentCreatorController::class, 'update']);
 
 //Video
 Route::get('video', [VideoController::class, 'index']);
