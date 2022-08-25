@@ -55,4 +55,7 @@ Route::get('/media/{id}', [MediaController::class, 'show']);
 Route::patch('/media/{id}', [MediaController::class, 'update']);
 
 //Publishment
-Route::post('publishment', [PublishmentController::class, 'publish']);
+Route::get('publishment', [PublishmentController::class, 'index']);
+Route::get('/publishment/{id}', [PublishmentController::class, 'show']);
+Route::patch('/publishment/{id}', [PublishmentController::class, 'update']);
+Route::post('/publishment/publish', [PublishmentController::class, 'publish']);

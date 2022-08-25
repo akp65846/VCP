@@ -21,6 +21,57 @@ class PublishmentController extends ApiController
     }
 
     /**
+     * Display a listing of the resource.
+     *
+     * @return JsonResponse
+     */
+    public function index()
+    {
+        return $this->successResponse(Publishment::all());
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return JsonResponse
+     */
+    public function show($id): JsonResponse
+    {
+        $publishment = Publishment::query()->find($id);
+
+        if (empty($publishment)) {
+            return $this->errorResponse('Publishment not found');
+        }
+
+        return $this->successResponse($publishment);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param Request $request
+     * @param  int  $id
+     * @return JsonResponse
+     */
+    public function update(Request $request, $id): JsonResponse
+    {
+
+        $patchData = $request->post();
+
+        $publishment = Publishment::query()->find($id);
+
+        if (empty($publishment)) {
+            return $this->errorResponse('Publishment not found');
+        }
+
+        unset($patchData['upload_trial_time'], $patchData['media_id']);
+
+        $publishment->update($patchData);
+        return $this->successResponse($publishment);
+    }
+
+    /**
      * @throws ValidationException
      */
     public function publish(Request $request): JsonResponse
@@ -30,6 +81,7 @@ class PublishmentController extends ApiController
         $rules = [
             'video_id' => 'required',
             'target_platform_id' => 'required|exists:platform,id',
+            'title' => 'required'
         ];
 
         Validator::make($postData, $rules)->validate();
@@ -49,7 +101,10 @@ class PublishmentController extends ApiController
             'target_platform_id' => $postData['target_platform_id'],
             'video_id' => $video['id'],
             'scheduled_time' => empty($postData['scheduled_time']) ? now() : date('Y-m-d H:i:s', $postData['scheduled_time']),
-            'status' => PublishmentConstant::STATUS_ACTIVE
+            'status' => PublishmentConstant::STATUS_ACTIVE,
+            'title' => $postData['title'],
+            'is_notify_subscribers' => !empty($postData['is_notify_subscribers']) && $postData['is_notify_subscribers'] == 1 ? 1 : 0,
+            'description' => empty($postData['description']) ? $postData['description'] : NULL
         ]);
 
         $publishment->save();
