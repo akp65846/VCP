@@ -6,6 +6,7 @@ use App\Enum\PublishmentConstant;
 use App\Helpers\TaskLogger;
 use App\Models\Media;
 use App\Models\Publishment;
+use App\Models\Video;
 use Illuminate\Console\Command;
 
 class AssignMediaToPublishment extends Command
@@ -38,15 +39,20 @@ class AssignMediaToPublishment extends Command
 
         foreach ($publishments as $publishment) {
 
-            $media = Media::query()->where('video_id', $publishment->video_id)->first();
+            $video = Video::query()->find($publishment->video_id);
 
-            if (empty($media)) {
+            if (empty($video)) {
+                $skippedCount++;
+                continue;
+            }
+
+            if (empty($video['media_id'])) {
                 $skippedCount++;
                 continue;
             }
 
             $publishment->update([
-                'media_id' => $media->id
+                'media_id' => $video['media_id']
             ]);
             $assignedCount++;
         }

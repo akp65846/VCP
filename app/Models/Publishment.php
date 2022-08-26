@@ -21,7 +21,7 @@ class Publishment extends Model
         'is_notify_subscribers',
         'scheduled_time',
         'uploaded_time',
-        'upload_trial_time',
+        'upload_trial_times',
         'external_tags',
         'data',
         'status',

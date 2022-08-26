@@ -104,7 +104,7 @@ class PublishmentController extends ApiController
             'status' => PublishmentConstant::STATUS_ACTIVE,
             'title' => $postData['title'],
             'is_notify_subscribers' => !empty($postData['is_notify_subscribers']) && $postData['is_notify_subscribers'] == 1 ? 1 : 0,
-            'description' => empty($postData['description']) ? $postData['description'] : NULL
+            'description' => empty($postData['description']) ? NULL : $postData['description']
         ]);
 
         $publishment->save();

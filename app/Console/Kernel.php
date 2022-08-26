@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('task:load-video-url')->daily();
         $schedule->command('task:process-approved-video')->everyFiveMinutes()->withoutOverlapping();
         $schedule->command('task:assign-media-to-publishment')->everyFiveMinutes()->withoutOverlapping();
+        $schedule->command('task:process-publishment')->everyFiveMinutes()->withoutOverlapping();
     }
 
     /**

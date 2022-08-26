@@ -6,7 +6,7 @@ use App\Enum\PlatformAccountConstant;
 use App\Models\Media;
 use App\Models\PlatformAccount;
 use App\Models\Publishment;
-use Google\Exception;
+use Exception;
 use Google_Client;
 use Google_Service_YouTube;
 use Google_Service_YouTube_Video;
@@ -39,24 +39,22 @@ class UploadToYouTube extends Command
 
     private array $oauthClientConfigs = [];
 
+    /**
+     * @throws Exception
+     */
     public function handle()
     {
-//        $progressBar = $this->output->createProgressBar(100);
-
         if (empty($this->argument('publishmentID'))) {
-            $this->error("Missing publishment ID");
-            return FALSE;
+            throw new Exception("Missing publishment id");
         }
 
         $publishment = Publishment::query()->find($this->argument('publishmentID'));
 
         if(!$publishment instanceof Publishment) {
-            $this->error("Publishment not found");
-            return FALSE;
+            throw new Exception("Publishment not found");
         }
 
         $this->publishment = $publishment;
-//        $progressBar->advance(20);
 
         $accessTokenAccount = PlatformAccount::query()
             ->where('platform_id', $publishment['target_platform_id'])
@@ -65,8 +63,7 @@ class UploadToYouTube extends Command
             ->first();
 
         if (!$accessTokenAccount instanceof PlatformAccount) {
-            $this->error("access token account not found");
-            return FALSE;
+            throw new Exception("access token account not found");
         }
         $this->accessTokenAccount = $accessTokenAccount;
 
@@ -77,13 +74,10 @@ class UploadToYouTube extends Command
             ->first();
 
         if (empty($oauthClientConfigAccount)) {
-            $this->error("oauth client config not found");
-            return FALSE;
+            throw new Exception("oauth client config not found");
         }
 
         $this->oauthClientConfigs = json_decode($oauthClientConfigAccount['value'], TRUE);
-
-//        $progressBar->advance(10);
 
         $this->accessToken = $accessTokenAccount['value'];
 
@@ -95,27 +89,24 @@ class UploadToYouTube extends Command
         }
 
         if (!$this->accessToken) {
-            $this->error("cannot refresh access token");
-            return FALSE;
+            throw new Exception("cannot refresh access token");
         }
-
-//        $progressBar->advance(10);
 
         $media = Media::query()->find($this->publishment['media_id']);
         if (!$media instanceof Media) {
-            $this->error("media not found");
-            return FALSE;
+            throw new Exception("media not found");
         }
         $this->media = $media;
 
         $this->upload();
 
-
-        $this->info("success");
         return TRUE;
 
     }
 
+    /**
+     * @throws Exception
+     */
     private function refreshAccessToken() {
 
         $refreshTokenAccount = PlatformAccount::query()
@@ -125,8 +116,7 @@ class UploadToYouTube extends Command
             ->first();
 
         if (empty($refreshTokenAccount)) {
-            $this->error("Refresh token account not found");
-            return FALSE;
+            throw new Exception("refresh token account not found");
         }
 
         $refreshToken = $refreshTokenAccount['value'];
@@ -154,11 +144,13 @@ class UploadToYouTube extends Command
             return $accessToken;
 
         } else {
-            $this->error('cannot refresh token');
-            return FALSE;
+            throw new Exception("cannot refresh token");
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function upload() {
 
         $apiKeyAccount = PlatformAccount::query()
@@ -168,16 +160,14 @@ class UploadToYouTube extends Command
             ->first();
 
         if (empty($apiKeyAccount)) {
-            $this->error('api key account not found');
-            return FALSE;
+            throw new Exception("api key account not found");
         }
 
         $client = new Google_Client();
         try {
             $client->setAuthConfig($this->oauthClientConfigs);
-        } catch (Exception $e) {
-            $this->error($e->getMessage());
-            return FALSE;
+        } catch (\Google\Exception $e) {
+            throw new Exception($e->getMessage());
         }
         $client->setDeveloperKey($apiKeyAccount['value']);
         $client->setAccessToken($this->accessToken);
@@ -185,24 +175,30 @@ class UploadToYouTube extends Command
         $video = new Google_Service_YouTube_Video();
 
         $videoSnippet = new Google_Service_YouTube_VideoSnippet();
-        $videoSnippet->setCategoryId('22');
-        $videoSnippet->setDescription('Description of uploaded video.');
-        $videoSnippet->setTitle('Test video upload.');
+//        $videoSnippet->setCategoryId('22');
+
+        if (!empty($this->publishment->description)) {
+            $videoSnippet->setDescription($this->publishment->description);
+        }
+
+        if (!empty($this->publishment->title)) {
+            $videoSnippet->setTitle($this->publishment->title);
+        }
         $video->setSnippet($videoSnippet);
 
         $videoStatus = new Google_Service_YouTube_VideoStatus();
         $videoStatus->setPrivacyStatus('private');
         $video->setStatus($videoStatus);
 
-
         try{
             $response = $service->videos->insert(
                 'snippet,status',
                 $video,
                 array(
-                'data' => Storage::disk('local')->get($this->media['path']),
+                    'data' => Storage::disk('local')->get($this->media['path']),
                     'mimeType' => 'application/octet-stream',
-                    'uploadType' => 'multipart'
+                    'uploadType' => 'multipart',
+                    'notifySubscribers' => !empty($this->publishment->is_notify_subscribers) && $this->publishment->is_notify_subscribers == 1
                 )
             );
 
@@ -211,13 +207,14 @@ class UploadToYouTube extends Command
             if ($errorMsg[0] = '{') {
                 $errorDetail = json_decode($errorMsg, TRUE);
 
-                var_dump($errorDetail['error']['code']); //400
-                var_dump($errorDetail['error']['message']); // Request contains an invalid argument.
-                var_dump($errorDetail['error']['status']); // INVALID_ARGUMENT
+                throw new Exception("code: {$errorDetail['error']['code']}, message: {$errorDetail['error']['message']}, status: {$errorDetail['error']['status']}");
             }
-            $this->error($e->getMessage());
-            return FALSE;
+            throw new Exception($e->getMessage());
         }
+
+        $this->publishment->update([
+            'uploaded_time' => now()
+        ]);
 
         Storage::put('testres.txt', json_encode($response));
 
