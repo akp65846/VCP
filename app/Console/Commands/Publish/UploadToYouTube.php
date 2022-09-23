@@ -184,6 +184,11 @@ class UploadToYouTube extends Command
         if (!empty($this->publishment->title)) {
             $videoSnippet->setTitle($this->publishment->title);
         }
+
+        if (!empty($this->publishment->scheduled_time)) {
+            $videoSnippet->setPublishedAt($this->publishment->scheduled_time);
+        }
+
         $video->setSnippet($videoSnippet);
 
         $videoStatus = new Google_Service_YouTube_VideoStatus();

@@ -85,9 +85,15 @@ class GetVideoUrlFromTikTokUser extends Command
 
         foreach ($list as $item) {
 
+            $maxDuration = intval($contentCreator['max_video_duration']);
+            if (empty($maxDuration)) {
+                continue;
+            }
+
+
             $duration = (int)(intval($item['video']['duration']) / 1000);
 
-            if ($duration >= 60) {
+            if ($duration >= $maxDuration) {
                 $exceedLengthCount++;
                 continue;
             }

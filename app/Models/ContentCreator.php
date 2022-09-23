@@ -11,7 +11,7 @@ class ContentCreator extends Model
 
     protected $table = 'content_creator';
 
-    protected $fillable = ['platform_id', 'platform_unique_uid', 'name', 'profile_url', 'status', 'last_process_time'];
+    protected $fillable = ['platform_id', 'platform_unique_uid', 'name', 'profile_url', 'profile_icon_url', 'max_video_duration', 'status', 'last_processed_time'];
 
     const CREATED_AT = 'created_time';
     const UPDATED_AT = 'updated_time';

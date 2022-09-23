@@ -21,9 +21,29 @@ class VideoController extends ApiController
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->successResponse(Video::all());
+        $params = $request->query();
+
+        $query = Video::query();
+
+        foreach (['approval_status', 'status'] as $field) {
+            if (!empty($params[$field])) {
+                $query->where($field, $params[$field]);
+            }
+        }
+
+        if (!empty($params['order_by'])) {
+            if (!empty($params['order'])) {
+                $order = 'desc';
+            } else {
+                $order = 'asc';
+            }
+
+            $query->orderBy($params['order_by'], $order);
+        }
+
+        return $this->successResponse($query->get());
     }
 
     /**
@@ -60,7 +80,7 @@ class VideoController extends ApiController
             $this->errorResponse("Video not found");
         }
 
-        if ($this->approve($video)) {
+        if ($this->approve($video, $postData['remarks'])) {
             return $this->successResponse($video->refresh());
         } else {
             return $this->errorResponse('Cannot process request', StatusCode::HTTP_INTERNAL_SERVER_ERROR);
@@ -85,7 +105,7 @@ class VideoController extends ApiController
             $this->errorResponse("Video not found");
         }
 
-        if ($this->reject($video)) {
+        if ($this->reject($video, $postData['remarks'])) {
             return $this->successResponse($video->refresh());
         } else {
             return $this->errorResponse('Cannot process request', StatusCode::HTTP_INTERNAL_SERVER_ERROR);
@@ -113,9 +133,10 @@ class VideoController extends ApiController
      * Approve a video
      *
      * @param Video $video
+     * @param $remarks
      * @return bool
      */
-    private function approve(Video $video): bool
+    private function approve(Video $video, $remarks = null): bool
     {
         if (intval($video['approval_status']) !== VideoConstant::APPROVAL_STATUS_PENDING) {
             return FALSE;
@@ -124,12 +145,13 @@ class VideoController extends ApiController
         $video->update([
             'approval_status' => VideoConstant::APPROVAL_STATUS_APPROVED,
             'approval_time' => now(),
+            'remarks' => $remarks
         ]);
 
         return TRUE;
     }
 
-    private function reject(Video $video): bool
+    private function reject(Video $video, $remarks = null): bool
     {
         if (intval($video['approval_status']) !== VideoConstant::APPROVAL_STATUS_PENDING) {
             return FALSE;
@@ -138,6 +160,7 @@ class VideoController extends ApiController
         $video->update([
             'approval_status' => VideoConstant::APPROVAL_STATUS_REJECTED,
             'approval_time' => now(),
+            'remarks' => $remarks
         ]);
 
         return TRUE;

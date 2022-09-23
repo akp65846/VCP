@@ -5,6 +5,7 @@ use App\Http\Controllers\api\ContentCreatorController;
 use App\Http\Controllers\api\MediaController;
 use App\Http\Controllers\api\PlatformController;
 use App\Http\Controllers\api\PublishmentController;
+use App\Http\Controllers\api\TaskController;
 use App\Http\Controllers\api\VideoController;
 use Illuminate\Support\Facades\Route;
 
@@ -59,3 +60,7 @@ Route::get('publishment', [PublishmentController::class, 'index']);
 Route::get('/publishment/{id}', [PublishmentController::class, 'show']);
 Route::patch('/publishment/{id}', [PublishmentController::class, 'update']);
 Route::post('/publishment/publish', [PublishmentController::class, 'publish']);
+
+//Task
+Route::get('/task/log', [TaskController::class, 'listLog']);
+Route::post('/task/log', [TaskController::class, 'deleteLog']);

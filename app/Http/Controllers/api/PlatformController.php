@@ -23,9 +23,21 @@ class PlatformController extends ApiController
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->successResponse(Platform::all());
+        $params = $request->query();
+
+        $query = Platform::query();
+
+        foreach (['type', 'status'] as $field) {
+            if (!empty($params[$field])) {
+                $query->where($field, $params[$field]);
+            }
+        }
+
+        $result = $query->get();
+
+        return $this->successResponse($result);
     }
 
     /**
@@ -118,4 +130,5 @@ class PlatformController extends ApiController
     {
         return $this->errorResponse(null, StatusCode::HTTP_FORBIDDEN);
     }
+
 }

@@ -100,13 +100,21 @@ class PublishmentController extends ApiController
             'source_platform_id' => $video['platform_id'],
             'target_platform_id' => $postData['target_platform_id'],
             'video_id' => $video['id'],
-            'scheduled_time' => empty($postData['scheduled_time']) ? now() : date('Y-m-d H:i:s', $postData['scheduled_time']),
+            'scheduled_time' => empty($postData['scheduled_time']) ? now() : $postData['scheduled_time'],
+//            'scheduled_time' => empty($postData['scheduled_time']) ? now() : date('Y-m-d H:i:s', $postData['scheduled_time']),
             'status' => PublishmentConstant::STATUS_ACTIVE,
             'title' => $postData['title'],
             'is_notify_subscribers' => !empty($postData['is_notify_subscribers']) && $postData['is_notify_subscribers'] == 1 ? 1 : 0,
             'description' => empty($postData['description']) ? NULL : $postData['description']
         ]);
 
+        if (!empty($video['media_id'])) {
+            $publishment['media_id'] = $video['media_id'];
+        }
+
+        $video['publishment_count'] = $video['publishment_count'] + 1;
+
+        $video->save();
         $publishment->save();
 
         return $this->successResponse($publishment, null, StatusCode::HTTP_CREATED);
